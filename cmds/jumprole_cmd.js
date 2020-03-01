@@ -60,8 +60,10 @@ async function jumprole_cmd(message, client, Discord, prefix) {
           if (!tier_list_current) {
             tier_list_current = []
           }
-          // Add it to the new list
-          tier_list_current.push(jump_tier)
+          if (real_list.includes(jump_tier) === false) {
+            // Add it to the new list
+            tier_list_current.push(jump_tier)
+          }
           // Set the new list
           tier_list.set("list", tier_list_current)
         }

@@ -2,7 +2,7 @@
 const module_obj = {
   "restrictions": {
     "servers": {
-      "whitelist": "469869605570084886"
+      "whitelist": ["469869605570084886", "specific"]
     }
   },
   "functions": {
