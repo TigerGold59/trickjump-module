@@ -17,6 +17,9 @@ async function jumprole_cmd(message, client, Discord, prefix) {
       // jumprole set | <name> | <tier> | <command output>
       let new_args = message.content.split(" | ");
       let jname = new_args[1];
+      if (/^\s+$/.test(jname) || jname === "") {
+        return message.channel.send("Can't create a jump with a blank name.")
+      }
       let jump_tier = new_args[2];
       let output = new_args[3];
       if (output && !(new_args[4])) { // If there are 3 pipelines and not 5
@@ -52,7 +55,6 @@ async function jumprole_cmd(message, client, Discord, prefix) {
             tier_list.set("list", real_list)
           }
         }
-        // If the tier doesn't exist
         if (!tier) {
           tiers.set(jump_tier, [jname]);
           // Get the current list of tiers
@@ -60,7 +62,7 @@ async function jumprole_cmd(message, client, Discord, prefix) {
           if (!tier_list_current) {
             tier_list_current = []
           }
-          if (real_list.includes(jump_tier) === false) {
+          if (real_list.includes(jump_tier) === false || !real_list) {
             // Add it to the new list
             tier_list_current.push(jump_tier)
           }
@@ -84,6 +86,9 @@ async function jumprole_cmd(message, client, Discord, prefix) {
       break;
     case "remove":
       let name = message.content.split(prefix + "jumprole remove ")[1]
+      if (!name) {
+        name = " "
+      }
       if (name) {
         // Just delete the name of the jump and its values from the database
         let jump = await jumps.get(name)

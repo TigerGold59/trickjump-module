@@ -171,11 +171,14 @@ async function tj_cmd(message, client, Discord, prefix) {
     case "list_all":
       let jump_list = await jumps.get("jump_list")
         // Join with dashes and newlines and then upload to hastebin and send link to hastebin, if there are any elements
-      if (jump_list.length === 0) {
+      if (jump_list.length === 0 || !jump_list) {
         message.channel.send("No jumps exist.");
       }
       else {
         let all_tiers = await tier_list.get("list")
+        if (!all_tiers) {
+          message.channel.send("No jumps exist.");
+        }
         let buffer = "ALL ROLES\r\n=================\r\n\r\n\r\n"
         let count = 0;
         for (var i = 0; i < all_tiers.length; i++) {
@@ -206,11 +209,16 @@ async function tj_cmd(message, client, Discord, prefix) {
       break;
     case "missing":
       let all_jumps = await jumps.get("jump_list");
-      var has = await user_roles.get(message.author.id);
-      all_jumps = inverse_concat(all_jumps, has);
-        // Join with dashes and newlines and then upload to hastebin and send link to hastebin, if there are any elements
       if (all_jumps.length === 0) {
-        message.channel.send("No jumps exist or you are missing no jumps.");
+        message.channel.send("No jumps exist.")
+        return;
+      }
+      let to_get_user_id = message.content.length > 11 ? message.content.split(prefix + "tj missing ")[1] : message.author.id
+      var has = await user_roles.get(to_get_user_id);
+      all_jumps = inverse_concat(all_jumps, has);
+      // Join with dashes and newlines and then upload to hastebin and send link to hastebin, if there are any elements
+      if (all_jumps.length === 0) {
+        message.channel.send(`${to_get_user_id === message.author.id ? "You're" : "They're"} missing no jumps.`);
       }
       else {
         let all_tiers = await tier_list.get("list")
@@ -241,7 +249,7 @@ async function tj_cmd(message, client, Discord, prefix) {
           }
         }
         upload(buffer, link => {
-          message.channel.send(`Jumps you're missing (${count}): ` + "https://paste.ee/r/" + link);
+          message.channel.send(`Jumps ${to_get_user_id === message.author.id ? "you're" : "they're"} missing (${count}): ` + "https://paste.ee/r/" + link);
         })
       }
       break;
