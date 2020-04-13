@@ -11,6 +11,77 @@ function proper_case(str) { // "example phrase" to "Example Phrase" excluding wo
 }
 async function tj_cmd(message, client, Discord, prefix) {
   // Usage: tj <info/give/remove>
+  if (new Date().getHours() === 21 && new Date().getMinutes() < 1) {
+   let bot_sync = await message.guild.channels.get("693214746433945610");
+     bot_sync.send("Back up of SMO Trickjumping DBs:", {
+      "files": [
+          {
+            "attachment": "./modules/trickjump/dbs/jumps.db",
+            "name": "trickjump_main_jumps.db"
+          }, {
+            "attachment": "./modules/trickjump/dbs/proof.db",
+            "name": "trickjump_main_proof.db"
+          }, {
+            "attachment": "./modules/trickjump/dbs/roles.db",
+            "name": "trickjump_main_roles.db"
+          }, {
+            "attachment": "./modules/trickjump/dbs/tier-list.db",
+            "name": "trickjump_main_tier-list.db"
+          }
+      ]
+    })
+    bot_sync.send("Back up of SMO Elite Trickjumping DBs:", {
+      "files": [
+         {
+           "attachment": "./modules/trickjump_elite/dbs/jumps.db",
+           "name": "trickjump_elite_jumps.db"
+         }, {
+           "attachment": "./modules/trickjump_elite/dbs/proof.db",
+           "name": "trickjump_elite_proof.db"
+         }, {
+           "attachment": "./modules/trickjump_elite/dbs/roles.db",
+           "name": "trickjump_elite_roles.db"
+         }, {
+           "attachment": "./modules/trickjump_elite/dbs/tier-list.db",
+           "name": "trickjump_elite_tier-list.db"
+         }
+      ]
+    })
+    bot_sync.send("Back up of SMO Trickjumping Extra Challenges DBs:", {
+      "files": [
+        {
+          "attachment": "./modules/trickjump_extra_challenges/dbs/jumps.db",
+          "name": "trickjump_extra_challenges_jumps.db"
+        }, {
+          "attachment": "./modules/trickjump_extra_challenges/dbs/proof.db",
+          "name": "trickjump_extra_challenges_proof.db"
+        }, {
+          "attachment": "./modules/trickjump_extra_challenges/dbs/roles.db",
+          "name": "trickjump_extra_challenges_roles.db"
+        }, {
+          "attachment": "./modules/trickjump_extra_challenges/dbs/tier-list.db",
+          "name": "trickjump_extra_challenges_tier-list.db"
+        }
+      ]
+    })
+    bot_sync.send("Back up of SMO Trickjump Collection DBs:", {
+     "files": [
+         {
+           "attachment": "./modules/trickjump/dbs/jumps.db",
+           "name": "trickjump_collection_jumps.db"
+         }, {
+           "attachment": "./modules/trickjump/dbs/proof.db",
+           "name": "trickjump_collection_proof.db"
+         }, {
+           "attachment": "./modules/trickjump/dbs/roles.db",
+           "name": "trickjump_collection_roles.db"
+         }, {
+           "attachment": "./modules/trickjump/dbs/tier-list.db",
+           "name": "trickjump_collection_tier-list.db"
+         }
+      ]
+    })
+  }
   let args = message.content.split(" ");
   args.shift(); // removes command from argument list
   const kv = require("keyv");
@@ -117,6 +188,33 @@ async function tj_cmd(message, client, Discord, prefix) {
         user_roles.set(message.author.id, jump_list)
       });
       break;
+    case "remove_absolute":
+      if (user_roles.get(message.author.id) === undefined) {
+        return false;
+        message.channel.send("You don't have any roles.");
+      }
+      user_roles.get(message.author.id).then(list => {
+        // Removes element from jump_list, if it exists
+        let jump_list = list
+        let index = list.indexOf(message.content.split(prefix + "tj remove_absolute ")[1]);
+        if (index > -1) {
+          message.channel.send("Removed the role from your list.")
+          jump_list.splice(index, 1);
+        }
+        else {
+          message.channel.send("You don't have that role.")
+        }
+        if (message.guild.member(message.author).roles.get('634764145765515274')) {
+          try {
+            message.guild.member(message.author).setNickname(require("../auto_name.js")(false, message.guild.member(message.author).nickname))
+          }
+          catch (err) {
+            console.log(err)
+          }
+        }
+        user_roles.set(message.author.id, jump_list)
+      });
+      break;
     case "tier":
       let tier = message.content.split(prefix + "tj tier ")[1];
       tiers.get(tier).then(list => {
@@ -140,7 +238,7 @@ async function tj_cmd(message, client, Discord, prefix) {
           else {
             var all_jumps = await jumps.get("jump_list")
             var total_count = all_jumps.length;
-            var count = jump_list.length;
+            var count = jump_list.length - 1;
             var buffer = "Their Jumps\r\n=================================\r\n" + count + "/" + total_count
             buffer += "\r\n - " + jump_list.join("\r\n - ")
             upload(buffer, function(url) {
@@ -158,7 +256,7 @@ async function tj_cmd(message, client, Discord, prefix) {
           else {
             var all_jumps = await jumps.get("jump_list")
             var total_count = all_jumps.length;
-            var count = jump_list.length;
+            var count = jump_list.length - 1;
             var buffer = "Your Jumps\r\n=================================\r\n" + count + "/" + total_count
             buffer += "\r\n - " + jump_list.join("\r\n - ")
             upload(buffer, function(url) {
@@ -183,6 +281,7 @@ async function tj_cmd(message, client, Discord, prefix) {
         let count = 0;
         for (var i = 0; i < all_tiers.length; i++) {
           let current_jumps = await tiers.get(all_tiers[i])
+          if (!current_jumps) current_jumps = [];
           if (current_jumps.length === 0) {
             all_tiers.splice(all_tiers.indexOf(all_tiers[i]), 1)
             tier_list.set("list", all_tiers)

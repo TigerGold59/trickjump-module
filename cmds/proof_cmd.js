@@ -123,6 +123,43 @@ async function proof_cmd(message, client, Discord, prefix) {
         })
       }
       break;
+    case "missing":
+      var proof_current = await proof_db.get(message.author.id)
+      var user_jumproles_current = await roles_db.get(message.author.id)
+      var other_user = false;
+      if (message.content.split(prefix + "proof missing ")[1]) {
+        other_user = true;
+        proof_current = await proof_db.get(message.content.split(prefix + "proof missing ")[1])
+        user_jumproles_current = await roles_db.get(message.content.split(prefix + "proof missing ")[1])
+      }
+      if (!proof_current) {
+        message.channel.send(`${other_user ? "They" : "You"} have no proof listed.`)
+      }
+      else {
+        let buffer = ""
+        let missing_counter = 0;
+        var new_proof = proof_current;
+        // Delete proof for jumps user doesn't have
+        for (jump in proof_current) {
+          if (user_jumproles_current.includes(jump) === false) {
+            delete new_proof[jump]
+            require("../../../log.js")("1 invalid proof deleted on list check from " + message.author.id)
+            continue;
+          }
+        }
+        for (var i = 0; i < user_jumproles_current.length; i++) {
+          if (Object.keys(new_proof).includes(user_jumproles_current[i]) === false) {
+            missing_counter++
+            buffer += "\r\n - " + user_jumproles_current[i];
+          }
+        }
+        buffer = `${other_user ? "Their" : "Your"} List of Missing Proof\r\n=======================\r\n${other_user ? "They" : "You"} have missing proof for ${missing_counter} jump(s) out of ${user_jumproles_current.length} total roles\r\n` + buffer
+        proof_db.set(message.author.id, new_proof);
+        upload(buffer, function (url) {
+          message.channel.send(`Here is ${other_user ? "their" : "your"} list of missing proof for jumps: ` + "https://paste.ee/r/" + url)
+        })
+      }
+      break;
     case "get":
       if (message.content.split(" | ").length > 3) {
         message.channel.send("Incorrect formatting of the command. Please use " + prefix + "commands for the correct usage.")
