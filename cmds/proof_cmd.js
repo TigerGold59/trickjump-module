@@ -221,7 +221,7 @@ async function proof_cmd(message, client, Discord, prefix) {
         : author_roles;
       if (!requested_proof || requested_proof === {}) {
         message.channel.send(
-          `${requested_proof ? "They" : "You"} have no proof listed.`
+          `${did_request_id ? "They" : "You"} have no proof listed.`
         );
         return;
       } else {

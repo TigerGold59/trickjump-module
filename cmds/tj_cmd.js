@@ -79,7 +79,7 @@ async function tj_cmd(message, client, Discord, prefix) {
         );
       } else {
         message.channel.send(
-          `That jump doesn't exist. Check for typos or list all jumps with ${prefix}tj list_all`
+          `That jump doesn't exist. Check for typos or list all jumps with \`${prefix}tj list_all\`.`
         );
       }
       break;
