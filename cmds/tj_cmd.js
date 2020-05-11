@@ -1,360 +1,465 @@
-function proper_case(str) { // "example phrase" to "Example Phrase" excluding words and, to, of
-  let words = str.split(" ");
+function proper_case(str) {
+  // "example phrase" to "Example Phrase" excluding words and, to, of
+  let words = str.toLowerCase().split(" ");
   for (var i = 0; i < words.length; i++) {
     let word = words[i].split("");
-    if ((word.join("") === "to" || word.join("") === "and" || word.join("") === "of") === false) {
+    if (
+      (words[i] === "to" ||
+        words[i] === "and" ||
+        words[i] === "of" ||
+        words[i] === "a" ||
+        words[i] === "an" ||
+        words[i] === "the" ||
+        words[i] === "for" ||
+        words[i] === "nor" ||
+        words[i] === "but" ||
+        words[i] === "yet" ||
+        words[i] === "above" ||
+        words[i] === "below" ||
+        words[i] === "behind" ||
+        words[i] === "around" ||
+        /^https\:\/\/[a-zA-Z0-9\-\.\_\+\/]+$/.test(words[i])) === false
+    )
       word[0] = word[0].toUpperCase();
+    for (var j = 0; j < word.length; j++) {
+      if (word[j] === "’") word[j] = "'";
     }
     words[i] = word.join("");
   }
   return words.join(" ");
 }
-async function tj_cmd(message, client, Discord, prefix) {
-  // Usage: tj <info/give/remove>
-  if (new Date().getHours() === 21 && new Date().getMinutes() < 1) {
-   let bot_sync = await message.guild.channels.get("693214746433945610");
-     bot_sync.send("Back up of SMO Trickjumping DBs:", {
-      "files": [
-          {
-            "attachment": "./modules/trickjump/dbs/jumps.db",
-            "name": "trickjump_main_jumps.db"
-          }, {
-            "attachment": "./modules/trickjump/dbs/proof.db",
-            "name": "trickjump_main_proof.db"
-          }, {
-            "attachment": "./modules/trickjump/dbs/roles.db",
-            "name": "trickjump_main_roles.db"
-          }, {
-            "attachment": "./modules/trickjump/dbs/tier-list.db",
-            "name": "trickjump_main_tier-list.db"
-          }
-      ]
-    })
-    bot_sync.send("Back up of SMO Elite Trickjumping DBs:", {
-      "files": [
-         {
-           "attachment": "./modules/trickjump_elite/dbs/jumps.db",
-           "name": "trickjump_elite_jumps.db"
-         }, {
-           "attachment": "./modules/trickjump_elite/dbs/proof.db",
-           "name": "trickjump_elite_proof.db"
-         }, {
-           "attachment": "./modules/trickjump_elite/dbs/roles.db",
-           "name": "trickjump_elite_roles.db"
-         }, {
-           "attachment": "./modules/trickjump_elite/dbs/tier-list.db",
-           "name": "trickjump_elite_tier-list.db"
-         }
-      ]
-    })
-    bot_sync.send("Back up of SMO Trickjumping Extra Challenges DBs:", {
-      "files": [
-        {
-          "attachment": "./modules/trickjump_extra_challenges/dbs/jumps.db",
-          "name": "trickjump_extra_challenges_jumps.db"
-        }, {
-          "attachment": "./modules/trickjump_extra_challenges/dbs/proof.db",
-          "name": "trickjump_extra_challenges_proof.db"
-        }, {
-          "attachment": "./modules/trickjump_extra_challenges/dbs/roles.db",
-          "name": "trickjump_extra_challenges_roles.db"
-        }, {
-          "attachment": "./modules/trickjump_extra_challenges/dbs/tier-list.db",
-          "name": "trickjump_extra_challenges_tier-list.db"
-        }
-      ]
-    })
-    bot_sync.send("Back up of SMO Trickjump Collection DBs:", {
-     "files": [
-         {
-           "attachment": "./modules/trickjump/dbs/jumps.db",
-           "name": "trickjump_collection_jumps.db"
-         }, {
-           "attachment": "./modules/trickjump/dbs/proof.db",
-           "name": "trickjump_collection_proof.db"
-         }, {
-           "attachment": "./modules/trickjump/dbs/roles.db",
-           "name": "trickjump_collection_roles.db"
-         }, {
-           "attachment": "./modules/trickjump/dbs/tier-list.db",
-           "name": "trickjump_collection_tier-list.db"
-         }
-      ]
-    })
+
+function inverse_concat(arr1, arr2) {
+  let result = [];
+  for (var i = 0; i < arr1.length; i++) {
+    if (arr2.includes(arr1[i]) === false) {
+      result.push(arr1[i]);
+    }
   }
-  let args = message.content.split(" ");
-  args.shift(); // removes command from argument list
+  return result;
+}
+
+function inclusive_concat(arr1, arr2) {
+  let result = [];
+  for (var i = 0; i < arr1.length; i++) {
+    if (arr2.includes(arr1[i])) {
+      result.push(arr1[i]);
+    }
+  }
+  return result;
+}
+
+async function tj_cmd(message, client, Discord, prefix) {
   const kv = require("keyv");
   const jumps = new kv("sqlite://modules/trickjump/dbs/jumps.db");
-  const tiers = new kv("sqlite://modules/trickjump/dbs/jumps.db", {namespace: "tiers"});
+  const jump_list = await jumps.get("jump_list");
+  const tiers = new kv("sqlite://modules/trickjump/dbs/jumps.db", {
+    namespace: "tiers",
+  });
   const user_roles = new kv("sqlite://modules/trickjump/dbs/roles.db");
-  const tier_list = new kv("sqlite://modules/trickjump/dbs/tier-list.db")
-  const upload = require("../../../upload_to_pastebin.js")
-  function inverse_concat(arr1, arr2) {
-    let result = []
-    for (var i = 0; i < arr1.length; i++) {
-      if (arr2.includes(arr1[i]) === false) {
-        result.push(arr1[i]);
-      }
-    }
-    return result;
+  let author_roles = await user_roles.get(message.author.id);
+  const tier_list = new kv("sqlite://modules/trickjump/dbs/tier-list.db");
+  let all_tiers = await tier_list.get("list");
+  const upload = require("../../../upload_to_pastebin.js");
+  let args = message.content.split(" ");
+  args.shift(); // removes command from argument list
+  if (args.length < 1) {
+    message.channel.send(
+      `Incorrect command formatting. Usage: \`${prefix}tj give <jump name>\` (without arrows), or list all commands with \`${prefix}commands\`.`
+    );
+    return;
   }
   switch (args[0]) {
-    case "info":
-      let to_split = prefix + "tj info ";
-      let exists_arr = await jumps.get("jump_list"); // All jumps
-      if (exists_arr.includes(proper_case(message.content.split(to_split)[1])) === false) { // Check if jump exists so we don't get weird errors
-        message.channel.send("That jump doesn't exist. Check for typos.");
-      }
-      else {
-        jump_info = await jumps.get(proper_case(message.content.split(to_split)[1]))
-        message.channel.send(jump_info.output + "\r\n\r\n Tier: " + jump_info.tier);
-      }
-      break;
-    case "give":
-      jumps.get("jump_list").then(list => {
-        if (!list.includes(proper_case(message.content.split(prefix + "tj give ")[1]))) {
-          message.channel.send("That role doesn't exist.")
-        }
-        else {
-          user_roles.get(message.author.id).then(roles => {
-            if (!roles) {
-              let list = [proper_case(message.content.split(prefix + "tj give ")[1])];
-			  if (message.guild.member(message.author).roles.get('576550505275457557')) {
-                try {
-                  message.guild.member(message.author).setNickname(require("../auto_name.js")(true, message.guild.member(message.author).nickname))
-                }
-                catch (err) {
-                  console.log(err)
-                }
-              }
-              message.channel.send("Gave you the role.")
-              user_roles.set(message.author.id, list);
-            }
-            else if (!(roles.includes(proper_case(message.content.split(prefix + "tj give ")[1])))) {
-              let list = roles;
-              if (message.guild.member(message.author).roles.get('576550505275457557')) {
-                try {
-                  message.guild.member(message.author).setNickname(require("../auto_name.js")(true, message.guild.member(message.author).nickname))
-                }
-                catch (err) {
-                  console.log(err)
-                }
-              }
-              list.push(proper_case(message.content.split(prefix + "tj give ")[1]));
-              message.channel.send("Gave you the role.")
-              user_roles.set(message.author.id, list);
-            }
-            else {
-              message.channel.send("You already have that role.");
-            }
-          });
-        }
-      })
-      break;
-    case "give_all":
-        var all = await jumps.get("jump_list")
-        user_roles.set(message.author.id, all);
-        message.channel.send("Gave you all roles.")
-        break;
-    case "remove_all":
-        user_roles.set(message.author.id, []);
-        message.channel.send("Took away all your roles.")
-        break;
-    case "remove":
-      if (user_roles.get(message.author.id) === undefined) {
-        return false;
-        message.channel.send("You don't have any roles.");
-      }
-      user_roles.get(message.author.id).then(list => {
-        // Removes element from jump_list, if it exists
-        let jump_list = list
-        let index = list.indexOf(proper_case(message.content.split(prefix + "tj remove ")[1]));
-        if (index > -1) {
-          message.channel.send("Removed the role from your list.")
-          jump_list.splice(index, 1);
-        }
-        else {
-          message.channel.send("You don't have that role.")
-        }
-        if (message.guild.member(message.author).roles.get('634764145765515274')) {
-          try {
-            message.guild.member(message.author).setNickname(require("../auto_name.js")(false, message.guild.member(message.author).nickname))
-          }
-          catch (err) {
-            console.log(err)
-          }
-        }
-        user_roles.set(message.author.id, jump_list)
-      });
-      break;
-    case "remove_absolute":
-      if (user_roles.get(message.author.id) === undefined) {
-        return false;
-        message.channel.send("You don't have any roles.");
-      }
-      user_roles.get(message.author.id).then(list => {
-        // Removes element from jump_list, if it exists
-        let jump_list = list
-        let index = list.indexOf(message.content.split(prefix + "tj remove_absolute ")[1]);
-        if (index > -1) {
-          message.channel.send("Removed the role from your list.")
-          jump_list.splice(index, 1);
-        }
-        else {
-          message.channel.send("You don't have that role.")
-        }
-        if (message.guild.member(message.author).roles.get('634764145765515274')) {
-          try {
-            message.guild.member(message.author).setNickname(require("../auto_name.js")(false, message.guild.member(message.author).nickname))
-          }
-          catch (err) {
-            console.log(err)
-          }
-        }
-        user_roles.set(message.author.id, jump_list)
-      });
-      break;
-    case "tier":
-      let tier = message.content.split(prefix + "tj tier ")[1];
-      tiers.get(tier).then(list => {
-        if (list) {
-          upload(list.length + "\r\n\r\n - " + list.join("\r\n - "), function(url) {
-            message.channel.send("List of jumps in that tier: " + "https://paste.ee/r/" + url);
-          })
-        }
-        else {
-          message.channel.send("No jumps in that tier exist.")
-        }
-      })
-      break;
-    case "list":
-      if (message.content.split(prefix + "tj list ")[1]) {
-        user_roles.get(message.content.split(prefix + "tj list ")[1]).then(async function (jump_list){
-          // Join with dashes and newlines and then upload to hastebin and send link to hastebin, if there are any elements
-          if (!jump_list) {
-            message.channel.send("They do not have any roles or they do not exist.");
-          }
-          else {
-            var all_jumps = await jumps.get("jump_list")
-            var total_count = all_jumps.length;
-            var count = jump_list.length - 1;
-            var buffer = "Their Jumps\r\n=================================\r\n" + count + "/" + total_count
-            buffer += "\r\n - " + jump_list.join("\r\n - ")
-            upload(buffer, function(url) {
-              message.channel.send("List of roles that user has: " + "https://paste.ee/r/" + url);
-            })
-          }
-        })
-      }
-      else {
-        user_roles.get(message.author.id).then(async function (jump_list){
-          // Join with dashes and newlines and then upload to hastebin and send link to hastebin, if there are any elements
-          if (!jump_list) {
-            message.channel.send("You do not have any roles.");
-          }
-          else {
-            var all_jumps = await jumps.get("jump_list")
-            var total_count = all_jumps.length;
-            var count = jump_list.length - 1;
-            var buffer = "Your Jumps\r\n=================================\r\n" + count + "/" + total_count
-            buffer += "\r\n - " + jump_list.join("\r\n - ")
-            upload(buffer, function(url) {
-              message.channel.send("List of roles you have: " + "https://paste.ee/r/" + url);
-            })
-          }
-        })
+    case "info": {
+      let name = proper_case(message.content.split(`${prefix}tj info `)[1]); // %tj info <name>
+      if (jump_list.includes(name)) {
+        let info_data = await jumps.get(name);
+        message.channel.send(
+          `${info_data.output}\r\n\r\n Tier: ${info_data.tier}`
+        );
+      } else {
+        message.channel.send(
+          `That jump doesn't exist. Check for typos or list all jumps with ${prefix}tj list_all`
+        );
       }
       break;
-    case "list_all":
-      let jump_list = await jumps.get("jump_list")
-        // Join with dashes and newlines and then upload to hastebin and send link to hastebin, if there are any elements
-      if (jump_list.length === 0 || !jump_list) {
-        message.channel.send("No jumps exist.");
-      }
-      else {
-        let all_tiers = await tier_list.get("list")
-        if (!all_tiers) {
-          message.channel.send("No jumps exist.");
-        }
-        let buffer = "ALL ROLES\r\n=================\r\n\r\n\r\n"
-        let count = 0;
-        for (var i = 0; i < all_tiers.length; i++) {
-          let current_jumps = await tiers.get(all_tiers[i])
-          if (!current_jumps) current_jumps = [];
-          if (current_jumps.length === 0) {
-            all_tiers.splice(all_tiers.indexOf(all_tiers[i]), 1)
-            tier_list.set("list", all_tiers)
-          }
-          else {
-            buffer += all_tiers[i] + "\r\n==============\r\n"
-            for (var j = 0; j < current_jumps.length; j++) {
-              if (jump_list.includes(current_jumps[j])) {
-                buffer += current_jumps[j] + "\r\n"
-                count++;
-              }
-              else {
-                current_jumps.splice(current_jumps.indexOf(current_jumps[i]), 1)
-                tiers.set(all_tiers[i], current_jumps)
-              }
-            }
-            buffer += "\r\n\r\n"
-          }
-        }
-        upload(buffer, link => {
-          message.channel.send(`All jumps (${count}): ` + "https://paste.ee/r/" + link);
-        })
-      }
-      break;
-    case "missing":
-      let all_jumps = await jumps.get("jump_list");
-      if (all_jumps.length === 0) {
-        message.channel.send("No jumps exist.")
+    }
+    case "give": {
+      if (!message.content.split(`${prefix}tj give `)[1]) {
+        message.channel.send(
+          `Incorrect command formatting. Usage: \`${prefix}tj give <jump name>\` (without brackets), or list all commands with \`${prefix}commands\`.`
+        );
         return;
       }
-      let to_get_user_id = message.content.length > 11 ? message.content.split(prefix + "tj missing ")[1] : message.author.id
-      var has = await user_roles.get(to_get_user_id);
-      all_jumps = inverse_concat(all_jumps, has);
-      // Join with dashes and newlines and then upload to hastebin and send link to hastebin, if there are any elements
-      if (all_jumps.length === 0) {
-        message.channel.send(`${to_get_user_id === message.author.id ? "You're" : "They're"} missing no jumps.`);
+      let name = proper_case(message.content.split(`${prefix}tj give `)[1]); // %tj give <name>
+      if (jump_list.includes(name) === false) {
+        // if this jump doesn't exist
+        message.channel.send(
+          `That jump doesn't exist. Check for typos or list all jumps with \`${prefix}tj list_all\`.`
+        );
+        return;
       }
-      else {
-        let all_tiers = await tier_list.get("list")
-        let buffer = "MISSING ROLES\r\n=================\r\n\r\n\r\n"
-        let count = 0;
-        for (var i = 0; i < all_tiers.length; i++) {
-          let current_jumps = await tiers.get(all_tiers[i])
-          if (current_jumps.length === 0) {
-            all_tiers.splice(all_tiers.indexOf(all_tiers[i]), 1)
-            tier_list.set("list", all_tiers)
-          }
-          else if (inverse_concat(current_jumps, has).length === 0) {
-            continue;
-          }
-          else {
-            current_jumps = inverse_concat(current_jumps, has)
-            if (!current_jumps) {
+      if (!author_roles) {
+        // user has no roles
+        author_roles = [name];
+        await user_roles.set(message.author.id, author_roles);
+        await message.react("✅");
+        return;
+      }
+      if (author_roles.includes(name)) {
+        // user already has the role
+        message.channel.send(
+          `You already have that jump. You can list your jumps with \`${prefix}tj list\`.`
+        );
+        return;
+      }
+      // user has other roles but not requested one
+      author_roles.push(name);
+      await user_roles.set(message.author.id, author_roles);
+      await message.react("✅");
+      return;
+      break;
+    }
+    case "give_absolute": {
+      // doesn't automatically change case of role name
+      if (!message.content.split(`${prefix}tj give `)[1]) {
+        message.channel.send(
+          `Incorrect command formatting. Usage: \`${prefix}tj give <jump name>\` (without arrows), or list all commands with \`${prefix}commands\`.`
+        );
+        return;
+      }
+      let name = message.content.split(`${prefix}tj give `)[1]; // %tj give <name>
+      if (jump_list.includes(name) === false) {
+        // if this jump doesn't exist
+        message.channel.send(
+          `That jump doesn't exist. Check for typos or list all jumps with \`${prefix}tj list_all\`.`
+        );
+        return;
+      }
+      if (!author_roles) {
+        // user has no roles
+        author_roles = [name];
+        await user_roles.set(message.author.id, author_roles);
+        await message.react("✅");
+        return;
+      }
+      if (author_roles.includes(name)) {
+        // user already has the role
+        message.channel.send(
+          `You already have that jump. You can list your jumps with \`${prefix}tj list\`.`
+        );
+        return;
+      }
+      // user has other roles but not requested one
+      author_roles.push(name);
+      await user_roles.set(message.author.id, author_roles);
+      await message.react("✅");
+      return;
+      break;
+    }
+    case "give_all": {
+      await user_roles.set(message.author.id, jump_list);
+      await message.react("✅");
+      return;
+      break;
+    }
+    case "remove": {
+      let name = proper_case(message.content.split(`${prefix}tj remove `)[1]); // %tj remove <name>
+      if (jump_list.includes(name) === false) {
+        // role doesn't exist
+        message.channel.send(
+          `That jump doesn't exist. Check for typos or list all jumps with \`${prefix}tj list_all\`.`
+        );
+        return;
+      }
+      if (author_roles === undefined || author_roles === []) {
+        // user's role list is empty
+        message.channel.send("You don't have any jumps.");
+        return;
+      }
+      let index = author_roles.indexOf(name);
+      if (index > -1) {
+        // user has the jump
+        author_roles.splice(index, 1);
+        await user_roles.set(message.author.id, author_roles);
+        await message.react("✅");
+        return;
+      } else {
+        // user doesn't have the jump but it exists
+        message.channel.send(
+          `You don't have that jump. Check for typos or list your jumps with \`${prefix}tj list\`.`
+        );
+        return;
+      }
+      break;
+    }
+    case "remove_absolute": {
+      // doesn't automatically change case of role name
+      let name = message.content.split(`${prefix}tj remove `)[1]; // %tj remove <name>
+      if (jump_list.includes(name) === false) {
+        // role doesn't exist
+        message.channel.send(
+          `That jump doesn't exist. Check for typos or list all jumps with \`${prefix}tj list_all\`.`
+        );
+        return;
+      }
+      let author_roles = await user_roles.get(message.author.id);
+      if (author_roles === undefined || author_roles === []) {
+        // user's role list is empty
+        message.channel.send("You don't have any jumps.");
+        return;
+      }
+      let index = author_roles.indexOf(name);
+      if (index > -1) {
+        // user has the jump
+        author_roles.splice(index, 1);
+        await user_roles.set(message.author.id, author_roles);
+        await message.react("✅");
+        return;
+      } else {
+        // user doesn't have the jump but it exists
+        message.channel.send(
+          `You don't have that jump. Check for typos or list your jumps with \`${prefix}tj list\`.`
+        );
+        return;
+      }
+      break;
+    }
+    case "remove_all": {
+      await user_roles.set(message.author.id, []);
+      await message.react("✅");
+      return;
+    }
+    case "list": {
+      let requested_id = message.content.split(`${prefix}tj list `)[1]
+        ? message.content.split(`${prefix}tj list`)[1].trim()
+        : null;
+      let did_request_id = requested_id !== null; // did the user ask for someone else's role list?
+      if (
+        did_request_id &&
+        new RegExp(`\\${prefix}tj list [0-9]{6,20}`, "i").test(
+          message.content
+        ) === false
+      ) {
+        message.channel.send(
+          `Incorrect command formatting. Usage: \`${prefix}tj list <optional user ID>\` (without arrows), or list all commands with \`${prefix}commands\`.\r\nMake sure you are using the user's ID instead of mentioning them (https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-).`
+        );
+        return;
+      }
+      let list = did_request_id
+        ? await user_roles.get(requested_id)
+        : author_roles;
+      if (!list || list.length === 0) {
+        // user has no roles
+        message.channel.send(
+          `${did_request_id ? "They" : "You"} don't have any jumps.`
+        );
+        return;
+      }
+      let buffer = `${
+        did_request_id ? "Their" : "Your"
+      } Roles\r\n=================\r\n\r\n`;
+      let updated_tiers = all_tiers; // for removing tiers; will update after for loop
+      let already_iterated = []; // jumps already gone over
+      let count = 0;
+      // iterate over tiers
+      for (var i = 0; i < all_tiers.length; i++) {
+        let jumps_in_tier = await tiers.get(all_tiers[i]);
+        if (inclusive_concat(jumps_in_tier, list).length === 0) {
+          continue;
+        }
+        let updated_jumps_in_tier = jumps_in_tier;
+        let did_remove = false; // were there any jumps that shouldn't be listed?
+        if (!jumps_in_tier || jumps_in_tier.length < 1) {
+          updated_tiers.splice(updated_tiers.indexOf(all_tiers[i]), 1);
+          continue;
+        }
+        buffer += `\r\n${all_tiers[i]}\r\n==============\r\n`;
+        // iterate over jumps in tier
+        for (var j = 0; j < jumps_in_tier.length; j++) {
+          if (
+            jump_list.includes(jumps_in_tier[j]) &&
+            already_iterated.includes(jumps_in_tier[j]) === false
+          ) {
+            if (list.includes(jumps_in_tier[j])) {
+              buffer += ` - ${jumps_in_tier[j]}\r\n`;
+              already_iterated.push(jumps_in_tier[j]);
+              count++;
+              continue;
+            } else {
+              already_iterated.push(jumps_in_tier[j]);
               continue;
             }
-            buffer += all_tiers[i] + "\r\n==============\r\n"
-            for (var j = 0; j < current_jumps.length; j++) {
-              if (all_jumps.includes(current_jumps[j])) {
-                buffer += current_jumps[j] + "\r\n"
-                count++;
-              }
-            }
-            buffer += "\r\n\r\n"
           }
+          updated_jumps_in_tier.splice(
+            updated_jumps_in_tier.indexOf(jumps_in_tier[j]),
+            1
+          );
+          did_remove = true;
         }
-        upload(buffer, link => {
-          message.channel.send(`Jumps ${to_get_user_id === message.author.id ? "you're" : "they're"} missing (${count}): ` + "https://paste.ee/r/" + link);
-        })
+        if (did_remove) await tiers.set(all_tiers[i], updated_jumps_in_tier);
+      }
+      await tier_list.set("list", updated_tiers);
+      upload(buffer, (link) => {
+        message.channel.send(
+          `${did_request_id ? "Their" : "Your"} jumps (${count}/${
+            jump_list.length
+          }): https://paste.ee/r/${link}`
+        );
+        return;
+      });
+      break;
+    }
+    case "missing": {
+      let requested_id = message.content.split(`${prefix}tj missing`)[1]
+        ? message.content.split(`${prefix}tj missing`)[1].trim()
+        : null;
+      let did_request_id = requested_id !== null; // did the user ask for someone else's role list?
+      if (
+        did_request_id &&
+        new RegExp(`\\${prefix}tj missing [0-9]{6,20}`, "i").test(
+          message.content
+        ) === false
+      ) {
+        message.channel.send(
+          `Incorrect command formatting. Usage: \`${prefix}tj missing <optional user ID>\` (without arrows), or list all commands with \`${prefix}commands\`.\r\nMake sure you are using the user's ID instead of mentioning them (https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-).`
+        );
+        return;
+      }
+      let list = did_request_id
+        ? await user_roles.get(requested_id)
+        : author_roles;
+      if (!list || list.length === 0) {
+        // user has no roles
+        message.channel.send(
+          `${did_request_id ? "They" : "You"} aren't missing any jumps.`
+        );
+        return;
+      }
+      let buffer = `${
+        did_request_id ? "Their" : "Your"
+      } Missing Roles\r\n=================\r\n\r\n`;
+      let updated_tiers = all_tiers; // for removing tiers; will update after for loop
+      let already_iterated = []; // jumps already gone over
+      let count = 0;
+      // iterate over tiers
+      for (var i = 0; i < all_tiers.length; i++) {
+        let jumps_in_tier = await tiers.get(all_tiers[i]);
+        if (inverse_concat(jumps_in_tier, list).length === 0) {
+          continue;
+        }
+        let updated_jumps_in_tier = jumps_in_tier;
+        let did_remove = false; // were there any jumps that shouldn't be listed?
+        if (!jumps_in_tier || jumps_in_tier.length < 1) {
+          updated_tiers.splice(updated_tiers.indexOf(all_tiers[i]), 1);
+          continue;
+        }
+        buffer += `\r\n${all_tiers[i]}\r\n==============\r\n`;
+        // iterate over jumps in tier
+        for (var j = 0; j < jumps_in_tier.length; j++) {
+          if (
+            jump_list.includes(jumps_in_tier[j]) &&
+            already_iterated.includes(jumps_in_tier[j]) === false
+          ) {
+            if (list.includes(jumps_in_tier[j]) === false) {
+              buffer += ` - ${jumps_in_tier[j]}\r\n`;
+              already_iterated.push(jumps_in_tier[j]);
+              count++;
+              continue;
+            } else {
+              already_iterated.push(jumps_in_tier[j]);
+              continue;
+            }
+          }
+          updated_jumps_in_tier.splice(
+            updated_jumps_in_tier.indexOf(jumps_in_tier[j]),
+            1
+          );
+          did_remove = true;
+        }
+        if (did_remove) await tiers.set(all_tiers[i], updated_jumps_in_tier);
+      }
+      await tier_list.set("list", updated_tiers);
+      upload(buffer, (link) => {
+        message.channel.send(
+          `${did_request_id ? "Their" : "Your"} missing jumps (${count}/${
+            jump_list.length
+          }): https://paste.ee/r/${link}`
+        );
+        return;
+      });
+      break;
+    }
+    case "list_all": {
+      if (!jump_list || jump_list.length === 0) {
+        message.channel.send("No jumps exist (yet).");
+        return;
+      }
+      let buffer = "All Roles\r\n=================\r\n\r\n";
+      let updated_tiers = all_tiers; // for removing tiers; will update after for loop
+      let already_iterated = []; // jumps already gone over
+      let updated_jumps = jump_list;
+      let count = 0;
+      // iterate over tiers
+      for (var i = 0; i < all_tiers.length; i++) {
+        let jumps_in_tier = await tiers.get(all_tiers[i]);
+        let updated_jumps_in_tier = jumps_in_tier;
+        let did_remove = false; // were there any jumps that shouldn't be listed?
+        if (!jumps_in_tier || jumps_in_tier.length < 1) {
+          updated_tiers.splice(updated_tiers.indexOf(all_tiers[i]), 1);
+          continue;
+        }
+        buffer += `\r\n${all_tiers[i]}\r\n==============\r\n`;
+        // iterate over jumps in tier
+        for (var j = 0; j < jumps_in_tier.length; j++) {
+          if (
+            jump_list.includes(jumps_in_tier[j]) &&
+            already_iterated.includes(jumps_in_tier[j]) === false
+          ) {
+            buffer += ` - ${jumps_in_tier[j]}\r\n`;
+            already_iterated.push(jumps_in_tier[j]);
+            count++;
+            continue;
+          }
+          updated_jumps_in_tier.splice(
+            updated_jumps_in_tier.indexOf(jumps_in_tier[j]),
+            1
+          );
+          did_remove = true;
+        }
+        if (did_remove) await tiers.set(all_tiers[i], updated_jumps_in_tier);
+      }
+      await tier_list.set("list", updated_tiers);
+      upload(buffer, (link) => {
+        message.channel.send(
+          `All jumps (${count}): https://paste.ee/r/${link}`
+        );
+        return;
+      });
+      break;
+    }
+    case "tier": {
+      let name = proper_case(message.content.split(`${prefix}tj tier `)[1]);
+      let jumps_in_tier = await tiers.get(name);
+      if (jumps_in_tier) {
+        upload(
+          `All ${name} Jumps\r\n==============\r\n${
+            jumps_in_tier.length
+          }\r\n\r\n - ${jumps_in_tier.join("\r\n - ")}`,
+          function (url) {
+            message.channel.send(
+              "List of jumps in that tier: " + "https://paste.ee/r/" + url
+            );
+            return;
+          }
+        );
+      } else {
+        message.channel.send("No jumps in that tier exist.");
+        return;
       }
       break;
-    default:
-      message.channel.send(`Invalid usage. Use ${prefix}commands for usage.`)
-      break;
+    }
   }
 }
+
 module.exports = tj_cmd;
