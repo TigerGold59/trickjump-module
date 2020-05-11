@@ -243,7 +243,7 @@ async function proof_cmd(message, client, Discord, prefix) {
         await proof.set(requested_id, requested_proof);
         if (count === 0) {
           message.channel.send(
-            `${requested_proof ? "They" : "You"} have no proof listed.`
+            `${did_request_id ? "They" : "You"} have no proof listed.`
           );
           return;
         }
