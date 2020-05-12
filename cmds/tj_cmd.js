@@ -1,33 +1,4 @@
-function proper_case(str) {
-  // "example phrase" to "Example Phrase" excluding words and, to, of
-  let words = str.toLowerCase().split(" ");
-  for (var i = 0; i < words.length; i++) {
-    let word = words[i].split("");
-    if (
-      (words[i] === "to" ||
-        words[i] === "and" ||
-        words[i] === "of" ||
-        words[i] === "a" ||
-        words[i] === "an" ||
-        words[i] === "the" ||
-        words[i] === "for" ||
-        words[i] === "nor" ||
-        words[i] === "but" ||
-        words[i] === "yet" ||
-        words[i] === "above" ||
-        words[i] === "below" ||
-        words[i] === "behind" ||
-        words[i] === "around" ||
-        /^https\:\/\/[a-zA-Z0-9\-\.\_\+\/]+$/.test(words[i])) === false
-    )
-      word[0] = word[0].toUpperCase();
-    for (var j = 0; j < word.length; j++) {
-      if (word[j] === "’") word[j] = "'";
-    }
-    words[i] = word.join("");
-  }
-  return words.join(" ");
-}
+const proper_case = require("../auto_case.js");
 
 function inverse_concat(arr1, arr2) {
   let result = [];
@@ -69,6 +40,77 @@ async function tj_cmd(message, client, Discord, prefix) {
     );
     return;
   }
+  if (new Date().getHours() === 21 && new Date().getMinutes() < 1) {
+  let bot_sync = await message.guild.channels.get("693214746433945610");
+    bot_sync.send("Back up of SMO Trickjumping DBs:", {
+     "files": [
+         {
+           "attachment": "./modules/trickjump/dbs/jumps.db",
+           "name": "trickjump_main_jumps.db"
+         }, {
+           "attachment": "./modules/trickjump/dbs/proof.db",
+           "name": "trickjump_main_proof.db"
+         }, {
+           "attachment": "./modules/trickjump/dbs/roles.db",
+           "name": "trickjump_main_roles.db"
+         }, {
+           "attachment": "./modules/trickjump/dbs/tier-list.db",
+           "name": "trickjump_main_tier-list.db"
+         }
+     ]
+   })
+   bot_sync.send("Back up of SMO Elite Trickjumping DBs:", {
+     "files": [
+        {
+          "attachment": "./modules/trickjump_elite/dbs/jumps.db",
+          "name": "trickjump_elite_jumps.db"
+        }, {
+          "attachment": "./modules/trickjump_elite/dbs/proof.db",
+          "name": "trickjump_elite_proof.db"
+        }, {
+          "attachment": "./modules/trickjump_elite/dbs/roles.db",
+          "name": "trickjump_elite_roles.db"
+        }, {
+          "attachment": "./modules/trickjump_elite/dbs/tier-list.db",
+          "name": "trickjump_elite_tier-list.db"
+        }
+     ]
+   })
+   bot_sync.send("Back up of SMO Trickjumping Extra Challenges DBs:", {
+     "files": [
+       {
+         "attachment": "./modules/trickjump_extra_challenges/dbs/jumps.db",
+         "name": "trickjump_extra_challenges_jumps.db"
+       }, {
+         "attachment": "./modules/trickjump_extra_challenges/dbs/proof.db",
+         "name": "trickjump_extra_challenges_proof.db"
+       }, {
+         "attachment": "./modules/trickjump_extra_challenges/dbs/roles.db",
+         "name": "trickjump_extra_challenges_roles.db"
+       }, {
+         "attachment": "./modules/trickjump_extra_challenges/dbs/tier-list.db",
+         "name": "trickjump_extra_challenges_tier-list.db"
+       }
+     ]
+   })
+   bot_sync.send("Back up of SMO Trickjump Collection DBs:", {
+      "files": [
+        {
+          "attachment": "./modules/trickjump/dbs/jumps.db",
+          "name": "trickjump_collection_jumps.db"
+        }, {
+          "attachment": "./modules/trickjump/dbs/proof.db",
+          "name": "trickjump_collection_proof.db"
+        }, {
+          "attachment": "./modules/trickjump/dbs/roles.db",
+          "name": "trickjump_collection_roles.db"
+        }, {
+          "attachment": "./modules/trickjump/dbs/tier-list.db",
+          "name": "trickjump_collection_tier-list.db"
+        }
+      ]
+    })
+  }
   switch (args[0]) {
     case "info": {
       let name = proper_case(message.content.split(`${prefix}tj info `)[1]); // %tj info <name>
@@ -103,6 +145,14 @@ async function tj_cmd(message, client, Discord, prefix) {
         // user has no roles
         author_roles = [name];
         await user_roles.set(message.author.id, author_roles);
+        if (message.guild.member(message.author).roles.get('576550505275457557')) {
+          try {
+            await message.guild.member(message.author).setNickname(require("../auto_name.js")(true, message.guild.member(message.author).nickname))
+          }
+          catch (err) {
+            console.log(err);
+          }
+        }
         await message.react("✅");
         return;
       }
@@ -116,6 +166,14 @@ async function tj_cmd(message, client, Discord, prefix) {
       // user has other roles but not requested one
       author_roles.push(name);
       await user_roles.set(message.author.id, author_roles);
+      if (message.guild.member(message.author).roles.get('576550505275457557')) {
+        try {
+          await message.guild.member(message.author).setNickname(require("../auto_name.js")(true, message.guild.member(message.author).nickname))
+        }
+        catch (err) {
+          console.log(err);
+        }
+      }
       await message.react("✅");
       return;
       break;
@@ -140,6 +198,14 @@ async function tj_cmd(message, client, Discord, prefix) {
         // user has no roles
         author_roles = [name];
         await user_roles.set(message.author.id, author_roles);
+        if (message.guild.member(message.author).roles.get('576550505275457557')) {
+          try {
+            await message.guild.member(message.author).setNickname(require("../auto_name.js")(true, message.guild.member(message.author).nickname))
+          }
+          catch (err) {
+            console.log(err);
+          }
+        }
         await message.react("✅");
         return;
       }
@@ -153,6 +219,14 @@ async function tj_cmd(message, client, Discord, prefix) {
       // user has other roles but not requested one
       author_roles.push(name);
       await user_roles.set(message.author.id, author_roles);
+      if (message.guild.member(message.author).roles.get('576550505275457557')) {
+        try {
+          await message.guild.member(message.author).setNickname(require("../auto_name.js")(true, message.guild.member(message.author).nickname))
+        }
+        catch (err) {
+          console.log(err);
+        }
+      }
       await message.react("✅");
       return;
       break;
@@ -182,6 +256,14 @@ async function tj_cmd(message, client, Discord, prefix) {
         // user has the jump
         author_roles.splice(index, 1);
         await user_roles.set(message.author.id, author_roles);
+        if (message.guild.member(message.author).roles.get('576550505275457557')) {
+          try {
+            await message.guild.member(message.author).setNickname(require("../auto_name.js")(false, message.guild.member(message.author).nickname))
+          }
+          catch (err) {
+            console.log(err);
+          }
+        }
         await message.react("✅");
         return;
       } else {
@@ -214,6 +296,14 @@ async function tj_cmd(message, client, Discord, prefix) {
         // user has the jump
         author_roles.splice(index, 1);
         await user_roles.set(message.author.id, author_roles);
+        if (message.guild.member(message.author).roles.get('576550505275457557')) {
+          try {
+            await message.guild.member(message.author).setNickname(require("../auto_name.js")(false, message.guild.member(message.author).nickname))
+          }
+          catch (err) {
+            console.log(err);
+          }
+        }
         await message.react("✅");
         return;
       } else {

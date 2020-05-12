@@ -1,33 +1,4 @@
-function proper_case(str) {
-  // "example phrase" to "Example Phrase" excluding words and, to, of
-  let words = str.toLowerCase().split(" ");
-  for (var i = 0; i < words.length; i++) {
-    let word = words[i].split("");
-    if (
-      (words[i] === "to" ||
-        words[i] === "and" ||
-        words[i] === "of" ||
-        words[i] === "a" ||
-        words[i] === "an" ||
-        words[i] === "the" ||
-        words[i] === "for" ||
-        words[i] === "nor" ||
-        words[i] === "but" ||
-        words[i] === "yet" ||
-        words[i] === "above" ||
-        words[i] === "below" ||
-        words[i] === "behind" ||
-        words[i] === "around" ||
-        /^https\:\/\/[a-zA-Z0-9\-\.\_\+\/]+$/.test(words[i])) === false
-    )
-      word[0] = word[0].toUpperCase();
-    for (var j = 0; j < word.length; j++) {
-      if (word[j] === "’") word[j] = "'";
-    }
-    words[i] = word.join("");
-  }
-  return words.join(" ");
-}
+const proper_case = require("../auto_case.js");
 
 function remove(array, item) {
   var buffer = [];
@@ -67,7 +38,7 @@ async function jumprole_cmd(message, client, Discord, prefix) {
       // jumprole set | <name> | <tier> | <command output>
       let new_args = message.content
         .split("|")
-        .map((x) => proper_case(x.trim()));
+        .map((x) => x.trim());
       if (new_args.length !== 4) {
         message.channel.send(
           `Incorrect command formatting. You can see the correct usage by listing all commands with \`${prefix}commands\`.`
@@ -126,15 +97,27 @@ async function jumprole_cmd(message, client, Discord, prefix) {
       break;
     }
     case "remove": {
-      let name = proper_case(
-        message.content.split(prefix + "jumprole remove")[1].trim()
-      );
+      let name = message.content.split(prefix + "jumprole remove")[1].trim();
       if (!name || /^\s+$/.test(name)) {
         name = " ";
       }
       // Just delete the name of the jump and its values from the database
       let jump = await jumps.get(name);
-      let jump_tier = jump.tier;
+      let jump_tier = jump.tier || null;
+      if (jump_tier === null) {
+        for (var i = 0; i < all_tiers.length; i++) {
+          let current_tier = await tiers.get(all_tiers[i]);
+          if (current_tier.length > remove(current_tier, name)) {
+            jump_tier = all_tiers[i];
+          }
+        }
+        if (jump_tier === null) {
+          message.channel.send(
+            `That jump doesn't exist. Check for typos or list all jumps with \`${prefix}tj list_all\`.`
+          );
+          return;
+        }
+      }
       let tier = await tiers.get(jump_tier);
       if (tier.indexOf(name) > -1) {
         // list of jumps in its tier has the jump

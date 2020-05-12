@@ -1,33 +1,4 @@
-function proper_case(str) {
-  // "example phrase" to "Example Phrase" excluding words and, to, of
-  let words = str.toLowerCase().split(" ");
-  for (var i = 0; i < words.length; i++) {
-    let word = words[i].split("");
-    if (
-      (words[i] === "to" ||
-        words[i] === "and" ||
-        words[i] === "of" ||
-        words[i] === "a" ||
-        words[i] === "an" ||
-        words[i] === "the" ||
-        words[i] === "for" ||
-        words[i] === "nor" ||
-        words[i] === "but" ||
-        words[i] === "yet" ||
-        words[i] === "above" ||
-        words[i] === "below" ||
-        words[i] === "behind" ||
-        words[i] === "around" ||
-        /^https\:\/\/[a-zA-Z0-9\-\.\_\+\/]+$/.test(words[i])) === false
-    )
-      word[0] = word[0].toUpperCase();
-    for (var j = 0; j < word.length; j++) {
-      if (word[j] === "’") word[j] = "'";
-    }
-    words[i] = word.join("");
-  }
-  return words.join(" ");
-}
+const proper_case = require("../auto_case.js");
 
 function inverse_concat(arr1, arr2) {
   let result = [];
