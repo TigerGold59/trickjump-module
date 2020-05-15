@@ -52,7 +52,7 @@ async function proof_cmd(message, client, Discord, prefix) {
           `That jump doesn't exist. Check for typos or list all jumps with  \`${prefix}tj list_all\`.`
         );
         return;
-      } else if (author_roles.includes(name) == false) {
+      } else if (!author_roles || author_roles.includes(name) == false) {
         // can't set proof for a jump you don't have
         message.channel.send(
           "You don't have that jump. Check if you made a typo or list all your jumps with \"" +
