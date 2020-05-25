@@ -208,6 +208,7 @@ async function proof_cmd(message, client, Discord, prefix) {
           }
           buffer += `\r\n - ${jump}: ${requested_proof[jump]
             .trim()
+            .toLowerCase()
             .replace(/\?s=[0-9]{0,2}/gi, "")}`;
           count++;
         }
