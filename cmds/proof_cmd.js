@@ -149,12 +149,13 @@ async function proof_cmd(message, client, Discord, prefix) {
           }\`.`
         );
         return;
-      } else if (requested_proof[name]) {
+      } else if (requested_proof && requested_proof[name]) {
         message.channel.send(
           `Link to ${
             did_request_id ? "their" : "your"
           } proof for ${name}: ${requested_proof[name]
             .trim()
+			.toLowerCase()
             .replace(/\?s=[0-9]{0,2}/gi, "")}`
         );
         return;
