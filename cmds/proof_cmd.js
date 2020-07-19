@@ -255,13 +255,13 @@ async function proof_cmd(message, client, Discord, prefix) {
         );
         return;
       }
-      let list = did_request_id
-        ? await Object.keys(proof.get(requested_id))
+      let author_proof_list = did_request_id
+        ? Object.keys(await proof.get(requested_id))
         : Object.keys(author_proof);
       let requested_roles = did_request_id
         ? await user_roles.get(requested_id)
-        : Object.keys(author_roles);
-      if (!list || list.length === 0) {
+        : author_roles;
+      if (!author_proof_list || author_proof_list.length === 0) {
         // user has no roles
         message.channel.send(
           `${did_request_id ? "They" : "You"} don't have any proof listed.`
@@ -277,12 +277,6 @@ async function proof_cmd(message, client, Discord, prefix) {
       // iterate over tiers
       for (var i = 0; i < all_tiers.length; i++) {
         let jumps_in_tier = await tiers.get(all_tiers[i]);
-        if (
-          inverse_concat(inverse_concat(requested_roles, jumps_in_tier), list)
-            .length === 0
-        ) {
-          continue;
-        }
         if (!jumps_in_tier || jumps_in_tier.length < 1) {
           updated_tiers.splice(updated_tiers.indexOf(all_tiers[idea]), 1);
           continue;
@@ -295,7 +289,7 @@ async function proof_cmd(message, client, Discord, prefix) {
             already_iterated.includes(jumps_in_tier[j]) === false
           ) {
             if (
-              list.includes(jumps_in_tier[j]) === false &&
+              author_proof_list.includes(jumps_in_tier[j]) === false &&
               requested_roles.includes(jumps_in_tier[j])
             ) {
               buffer += ` - ${jumps_in_tier[j]}\r\n`;
@@ -320,7 +314,7 @@ async function proof_cmd(message, client, Discord, prefix) {
       upload(buffer, (link) => {
         message.channel.send(
           `${did_request_id ? "Their" : "Your"} missing proof (${count}/${
-            requested_roles.length
+            already_iterated.filter(x => requested_roles.includes(x)).length
           } possessed jumps): https://paste.ee/r/${link}`
         );
         return;
