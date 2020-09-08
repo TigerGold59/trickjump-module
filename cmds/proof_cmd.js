@@ -26,7 +26,7 @@ async function proof_cmd(message, client, Discord, prefix) {
     namespace: "tiers",
   });
   const tier_list = new kv("sqlite://modules/trickjump/dbs/tier-list.db");
-  var all_tiers = await tier_list.get("list") || null;
+  var all_tiers = await tier_list.get("list") || [];
   const proof_regexp = /^https:\/\/twitter\.com\/\S+\/status\/[0-9]{10,}\/?(?:\?s=[0-9]{0,2})?$/i;
   const upload = require("../../../upload_to_pastebin.js");
   var args = message.content.split(" ");
