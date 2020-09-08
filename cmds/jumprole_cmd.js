@@ -103,11 +103,11 @@ async function jumprole_cmd(message, client, Discord, prefix) {
       }
       // Just delete the name of the jump and its values from the database
       let jump = await jumps.get(name);
-      let jump_tier = jump.tier || null;
+      let jump_tier = jump ? jump.tier || null : null;
       if (jump_tier === null) {
         for (var i = 0; i < all_tiers.length; i++) {
           let current_tier = await tiers.get(all_tiers[i]);
-          if (current_tier.length > remove(current_tier, name)) {
+          if (current_tier.length > remove(current_tier, name).length) {
             jump_tier = all_tiers[i];
           }
         }
