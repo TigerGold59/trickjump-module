@@ -28,7 +28,7 @@ async function jumprole_cmd(message, client, Discord, prefix) {
     namespace: "tiers",
   });
   const tier_list = new kv("sqlite://modules/trickjump/dbs/tier-list.db");
-  const all_tiers = await tier_list.get("list");
+  const all_tiers = await tier_list.get("list") || [];
   var args = message.content.split(" ");
   args.shift();
 
