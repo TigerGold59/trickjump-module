@@ -30,7 +30,7 @@ async function tj_cmd(message, client, Discord, prefix) {
   const user_roles = new kv("sqlite://modules/trickjump/dbs/roles.db");
   let author_roles = await user_roles.get(message.author.id);
   const tier_list = new kv("sqlite://modules/trickjump/dbs/tier-list.db");
-  let all_tiers = await tier_list.get("list");
+  let all_tiers = await tier_list.get("list") || [];
   const upload = require("../../../upload_to_pastebin.js");
   let args = message.content.split(" ");
   args.shift(); // removes command from argument list
