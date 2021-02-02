@@ -145,7 +145,7 @@ async function tj_cmd(message, client, Discord, prefix) {
         // user has no roles
         author_roles = [name];
         await user_roles.set(message.author.id, author_roles);
-        if (message.guild.member(message.author).roles.get('576550505275457557')) {
+        if (message.member.roles.cache.has('576550505275457557')) {
           try {
             await message.guild.member(message.author).setNickname(require("../auto_name.js")(true, message.guild.member(message.author).nickname))
           }
@@ -166,7 +166,7 @@ async function tj_cmd(message, client, Discord, prefix) {
       // user has other roles but not requested one
       author_roles.push(name);
       await user_roles.set(message.author.id, author_roles);
-      if (message.guild.member(message.author).roles.get('576550505275457557')) {
+      if (message.member.roles.cache.has('576550505275457557')) {
         try {
           await message.guild.member(message.author).setNickname(require("../auto_name.js")(true, message.guild.member(message.author).nickname))
         }
@@ -198,7 +198,7 @@ async function tj_cmd(message, client, Discord, prefix) {
         // user has no roles
         author_roles = [name];
         await user_roles.set(message.author.id, author_roles);
-        if (message.guild.member(message.author).roles.get('576550505275457557')) {
+        if (message.member.roles.cache.has('576550505275457557')) {
           try {
             await message.guild.member(message.author).setNickname(require("../auto_name.js")(true, message.guild.member(message.author).nickname))
           }
@@ -219,7 +219,7 @@ async function tj_cmd(message, client, Discord, prefix) {
       // user has other roles but not requested one
       author_roles.push(name);
       await user_roles.set(message.author.id, author_roles);
-      if (message.guild.member(message.author).roles.get('576550505275457557')) {
+      if (message.member.roles.cache.has('576550505275457557')) {
         try {
           await message.guild.member(message.author).setNickname(require("../auto_name.js")(true, message.guild.member(message.author).nickname))
         }
@@ -256,7 +256,7 @@ async function tj_cmd(message, client, Discord, prefix) {
         // user has the jump
         author_roles.splice(index, 1);
         await user_roles.set(message.author.id, author_roles);
-        if (message.guild.member(message.author).roles.get('576550505275457557')) {
+        if (message.member.roles.cache.has('576550505275457557')) {
           try {
             await message.guild.member(message.author).setNickname(require("../auto_name.js")(false, message.guild.member(message.author).nickname))
           }
@@ -296,7 +296,7 @@ async function tj_cmd(message, client, Discord, prefix) {
         // user has the jump
         author_roles.splice(index, 1);
         await user_roles.set(message.author.id, author_roles);
-        if (message.guild.member(message.author).roles.get('576550505275457557')) {
+        if (message.member.roles.cache.has('576550505275457557')) {
           try {
             await message.guild.member(message.author).setNickname(require("../auto_name.js")(false, message.guild.member(message.author).nickname))
           }
