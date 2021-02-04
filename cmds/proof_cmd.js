@@ -131,6 +131,15 @@ async function proof_cmd(message, client, Discord, prefix) {
       let requested_roles = did_request_id
         ? await user_roles.get(requested_id)
         : author_roles;
+      if (!requested_roles) {
+        // can't get proof for a jump you don't have
+        message.channel.send(
+          "You don't have that jump. Check if you made a typo or list all your jumps with \"" +
+            prefix +
+            'tj list".'
+        );
+        return;
+      }
       if (requested_roles.includes(name) === false) {
         if (Object.keys(requested_proof).includes(name) === false) {
           delete requested_proof[name];
