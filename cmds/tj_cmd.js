@@ -41,7 +41,7 @@ async function tj_cmd(message, client, Discord, prefix) {
     return;
   }
   if (new Date().getHours() === 21 && new Date().getMinutes() < 1) {
-  let bot_sync = await message.guild.channels.get("693214746433945610");
+  let bot_sync = await message.guild.channels.cache.get("693214746433945610");
     bot_sync.send("Back up of SMO Trickjumping DBs:", {
      "files": [
          {
